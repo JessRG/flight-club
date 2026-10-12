@@ -65,7 +65,7 @@ ORIGIN_CITY_IATA = "LHR"  # London Heathrow
 # ==================== Find Cheap Flights ====================
 
 for destination in sheet_data:
-    pprint(f"Getting flights for {destination['city']}...")
+    pprint(f"Getting direct flights for {destination['city']}...")
     flights = flight_search.check_flights(
         ORIGIN_CITY_IATA,
         destination["iataCode"],
@@ -73,6 +73,17 @@ for destination in sheet_data:
         to_time=six_month_from_today + vacation_days,
     )
     cheapest_flight = find_cheapest_flight(flights, return_date=six_month_from_today.strftime("%Y-%m-%d"))
+
+    if cheapest_flight.price == "N/A":
+        pprint(f"No direct flight to {destination['city']}. Looking for indirect flights...")
+        flights = flight_search.check_flights(
+            ORIGIN_CITY_IATA,
+            destination["iataCode"],
+            from_time=six_month_from_today,
+            to_time=six_month_from_today + vacation_days,
+            is_direct = False,
+        )
+        cheapest_flight = find_cheapest_flight(flights, return_date=six_month_from_today.strftime("%Y-%m-%d"))
     pprint(f"{destination['city']}: USD {cheapest_flight.price}")
 
     if cheapest_flight.price != "N/A" and cheapest_flight.price < destination["lowestPrice"]:
