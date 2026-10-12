@@ -55,7 +55,7 @@ sheet_data = data_manager.get_destination_data()
 # pprint(sheet_data)
 customer_data = data_manager.get_customer_emails()
 customer_email_list = [row.get("whatIsYourEmail?") for row in customer_data]
-pprint(f"Your email list includes {customer_email_list}")
+# pprint(f"Your email list includes {customer_email_list}")
 flight_search = FlightSearch()
 # Create an instance of the NotificationManager
 notification_manager = NotificationManager()
@@ -103,4 +103,4 @@ for destination in sheet_data:
         #                  f"from {cheapest_flight.origin_airport} to {cheapest_flight.destination_airport}, "
         #                  f"on {cheapest_flight.out_date} until {cheapest_flight.return_date}."
         # )
-        notification_manager.send_email(cheapest_flight)
+        notification_manager.send_emails(email_list=customer_email_list, flight=cheapest_flight)
