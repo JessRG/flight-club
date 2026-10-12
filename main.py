@@ -53,6 +53,9 @@ requests_cache.install_cache(
 data_manager = DataManager()
 sheet_data = data_manager.get_destination_data()
 # pprint(sheet_data)
+customer_data = data_manager.get_customer_emails()
+customer_email_list = [row.get("whatIsYourEmail?") for row in customer_data]
+pprint(f"Your email list includes {customer_email_list}")
 flight_search = FlightSearch()
 # Create an instance of the NotificationManager
 notification_manager = NotificationManager()
