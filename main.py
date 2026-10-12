@@ -10,7 +10,35 @@ from data_manager import DataManager
 from flight_search import FlightSearch
 from flight_data import find_cheapest_flight
 from notification_manager import NotificationManager
+import calendar
 
+# Use this function to help calculate appropriate month, year, and day if not using relativedelta
+def calculate_month_year_day(base_datetime, months_to_add):
+    """
+        Calculates a new datetime shifted by a specific number of calendar months.
+
+        This function adjusts the year, month, and day safely, clamping the
+        resulting day to the maximum valid calendar day of the target month
+        (e.g., handles leap years and shorter months) while preserving the
+        original time components.
+
+        Args:
+            base_datetime (datetime): The starting datetime object.
+            months_to_add (int): The number of months to advance (can be negative).
+
+        Returns:
+            datetime: A new datetime object formatted identically to datetime.now().
+        """
+    month = base_datetime.month - 1 + months_to_add
+    year = base_datetime.year + month // 12
+    month = month % 12 + 1
+
+    # monthrange returns a tuple: (day_of_week, num_days_in_month)
+    _, max_days = calendar.monthrange(year, month)
+
+    # Returns either the original day, or sets it to 28/29/30/31
+    safe_day = min(base_datetime.day, max_days)
+    return base_datetime.replace(year=year, month=month, day=safe_day)
 
 
 # ==================== Conserve requests and preserve your free plan ====================
@@ -30,8 +58,8 @@ flight_search = FlightSearch()
 notification_manager = NotificationManager()
 
 # ==================== Set the Dates and Origin Airport ====================
-tomorrow = datetime.now() + timedelta(days=1)
-six_month_from_today = datetime.now() + timedelta(days=(6 * 30))
+six_month_from_today = calculate_month_year_day(datetime.now(), 6)
+vacation_days = timedelta(days=12)
 ORIGIN_CITY_IATA = "LHR"  # London Heathrow
 
 # ==================== Find Cheap Flights ====================
@@ -41,8 +69,8 @@ for destination in sheet_data:
     flights = flight_search.check_flights(
         ORIGIN_CITY_IATA,
         destination["iataCode"],
-        from_time=tomorrow,
-        to_time=six_month_from_today
+        from_time=six_month_from_today,
+        to_time=six_month_from_today + vacation_days,
     )
     cheapest_flight = find_cheapest_flight(flights, return_date=six_month_from_today.strftime("%Y-%m-%d"))
     pprint(f"{destination['city']}: USD {cheapest_flight.price}")
