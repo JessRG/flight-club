@@ -14,7 +14,6 @@ class NotificationManager:
         self.twilio_verified_number = os.getenv("TWILIO_VERIFIED_NUMBER", "")
         self.whatsapp_number = os.getenv("TWILIO_WHATSAPP_NUMBER", "")
         self.client = Client(os.getenv('TWILIO_SID', ""), os.getenv("TWILIO_AUTH_TOKEN", ""))
-        self.connection = smtplib.SMTP(host=os.getenv("TEST_SMTP_ADDRESS", ""), port=int(os.getenv("PORT", 2525)))
 
     def send_sms(self, message_body):
         message = self.client.messages.create(
@@ -41,25 +40,25 @@ class NotificationManager:
                 f"Low price alert! Only ${flight.price} to fly "
                 f"from {flight.origin_airport} to {flight.destination_airport}, "
                 f"with {flight.stops} stop(s)"
-                f"departing on {flight.out_date} and returning on {flight.return_date}. ✈️\n"
+                f"departing on {flight.out_date} and returning on {flight.return_date}. ✈️\r\n"
             )
         else:
             body_text = (
                 f"Low price alert! Only ${flight.price} to fly direct "
                 f"from {flight.origin_airport} to {flight.destination_airport}, "
-                f"on {flight.out_date} until {flight.return_date}. ✈️\n"
+                f"on {flight.out_date} until {flight.return_date}. ✈️\r\n"
             )
 
-        with self.connection as smtp:
+        with smtplib.SMTP(host=os.getenv("TEST_SMTP_ADDRESS", ""), port=int(os.getenv("PORT", 2525))) as smtp:
             smtp.starttls()
             smtp.login(self.email, self.password)
             for email in email_list:
                 full_message = (
-                    f"From: {self.email}\n"
-                    f"To: {email}\n"
-                    "Subject: Flight Deal\n"
-                    "MIME-Version: 1.0\n"
-                    "Content-Type: text/plain; charset=utf-8\n\n"
+                    f"From: {self.email}\r\n"
+                    f"To: {email}\r\n"
+                    "Subject: Flight Deal\r\n"
+                    "MIME-Version: 1.0\r\n"
+                    "Content-Type: text/plain; charset=utf-8\r\n\r\n"
                     f"{body_text}"
                 )
                 smtp.sendmail(
